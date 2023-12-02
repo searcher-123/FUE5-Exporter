@@ -53,6 +53,86 @@ function get_neighbour_directions(entity, neighbours)
 	return directions
 end
 
+
+function get_items_inserter(entity)
+	local items = {}    
+	local pickup_list={}    
+--		game.print ("pick "..entity.pickup_target.type)
+		if ('furnace'==entity.pickup_target.type or entity.pickup_target.type=='assembling-machine') then
+				furnace=entity.pickup_target
+				if (furnace.get_recipe()~=nil) then
+ 	
+				for _,product in pairs (furnace.get_recipe().products) do
+					table.insert(pickup_list,product.name)
+				end
+				in_time=furnace.get_recipe().energy
+-- 				table.insert (items,"pick_power:"..furnace.power_production)
+  				table.insert (items,"intime:"..in_time)
+				end
+		end
+		if ('transport-belt'==entity.pickup_target.type) then				
+				table.insert(pickup_list,"transport-belt")
+		end
+		if ('container'==entity.pickup_target.type) then				
+				table.insert(pickup_list,"container")
+		end
+		
+		drop_list={}
+		for key,ent in pairs(game.surfaces["nauvis"].find_entities_filtered{position=entity.drop_position}) do
+--		game.print ("drop "..ent.type)
+		--	table.insert (items,"drop_target:"..ent.name)		
+	    	--	table.insert (items,"drop_target_type:"..ent.type)		
+			if ('container'==ent.type) then	
+				game.print ("Cont")			
+				table.insert(drop_list,"container")
+			end
+			if ('transport-belt'==ent.type) then				
+				table.insert(drop_list,"transport-belt")
+			end
+
+			if (ent.type=='furnace' or ent.type=='assembling-machine') then
+			    if (ent.burner~=nil and ent.burner.currently_burning~=nil) then
+			    table.insert(drop_list,ent.burner.currently_burning.name)
+			    end
+				game.print ("furnace ") 
+				if (ent.get_recipe()~=nil) then					
+					for key2,ing in ipairs(ent.get_recipe().ingredients) do
+					table.insert(drop_list,ing.name)
+					end
+					out_time=ent.get_recipe().energy
+--					table.insert (items,"drop_power"..ent.power_production)
+	  				table.insert (items,"out_time:"..out_time)
+				end
+			end
+		end
+		game.print ("#ing->"..#pickup_list)
+		game.print ("#ing2->"..#drop_list)
+		for key,ing in ipairs(pickup_list) do
+			game.print ("ing->"..ing) 							
+			for key2,ing2 in ipairs(drop_list) do				
+				game.print ("ing2->"..ing) 							
+				if (ing=='transport-belt' or ing=='container') then
+				--game.print (game.tick.." k-"..key2.."ing2->"..ing2) 								
+					table.insert (items,ing2)
+				end
+				if (ing2=='transport-belt' or ing2=='container') then
+				--game.print (game.tick.." k2-"..key2.."ing2->"..ing2) 								
+					table.insert (items,ing)
+				end
+				if ((ing.name~=nil and ing.name==ing2.name) or (ing~=nil and ing==ing2)) then -- same item as product of drop and ingridient of pickup
+--				game.print (game.tick.." k3-"..key2.."ing2->"..ing.name) 								
+					table.insert (items,ing)
+				end
+			end
+		end
+		--game.print("found target"..target_ent[1].name)
+		
+	return items
+end
+
+
+
+
 function get_pipe_type(directions)
 	local count = table_size(directions)
 	if count <= 2 then
@@ -77,21 +157,6 @@ function get_pipe_type(directions)
 	else
 		return 'X', 0
 	end
-end
-
-function is_carriage_back_mover(carriage)
-    local direction = defines.rail_direction
-    local train = carriage.train
-    local carriages = train.carriages
-    local carriage_in_front = carriage.get_connected_rolling_stock(direction.front)
-    if not carriage_in_front then
-        return carriage ~= train.front_stock
-    end
-    for index, train_carriage in ipairs(carriages) do
-        if carriage == train_carriage then
-            return carriages[index - 1] ~= carriage_in_front
-        end
-    end
 end
 
 function export_entities(event, print)
@@ -141,6 +206,10 @@ function export_entities(event, print)
 		if entity.type == 'underground-belt' and entity.belt_to_ground_type == 'input' then
 			export.direction = (export.direction + 4) % 8
 		end
+		if entity.type == 'inserter' then
+			export.inserter_rotation_speed=string.format("%.3f", entity.prototype.inserter_rotation_speed)
+			export.items=get_items_inserter (entity)
+		end
 
 		if export.name == 'straight-rail' then
 			if export.direction % 2 == 1 then
@@ -165,10 +234,6 @@ function export_entities(event, print)
 
 		if entity.type == 'tree' then
 			export.name = 'tree'
-		end
-
-		if entity.train then
-			export.back_mover = is_carriage_back_mover(entity)
 		end
 
 		print(entity.type .. ' ' .. export.name .. ' ' .. export.direction)
