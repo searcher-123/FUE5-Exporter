@@ -60,6 +60,17 @@ return {
               type = "string",
               description = "Operation of combinators"
             },
+             inserter_rotation_speed= {
+                       type= "string",
+                        description= "Rotation speed of inserter."
+                    },
+             inserter_items= {
+                   	type = "array",
+			items={
+				type="string",
+	                        description= "item for move by this inserter"
+				}			
+                    },
             variant = {
               type = "string",
               description = "Variant of this entity. For example \"I\", \"R\" or \"L\" for belts."

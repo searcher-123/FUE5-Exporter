@@ -53,7 +53,6 @@ function get_neighbour_directions(entity, neighbours)
 	return directions
 end
 
-
 function get_items_inserter(entity)
 	local items = {}    
 	local pickup_list={}    
@@ -130,9 +129,6 @@ function get_items_inserter(entity)
 	return items
 end
 
-
-
-
 function get_pipe_type(directions)
 	local count = table_size(directions)
 	if count <= 2 then
@@ -157,6 +153,21 @@ function get_pipe_type(directions)
 	else
 		return 'X', 0
 	end
+end
+
+function is_carriage_back_mover(carriage)
+    local direction = defines.rail_direction
+    local train = carriage.train
+    local carriages = train.carriages
+    local carriage_in_front = carriage.get_connected_rolling_stock(direction.front)
+    if not carriage_in_front then
+        return carriage ~= train.front_stock
+    end
+    for index, train_carriage in ipairs(carriages) do
+        if carriage == train_carriage then
+            return carriages[index - 1] ~= carriage_in_front
+        end
+    end
 end
 
 function export_entities(event, print)
@@ -206,9 +217,9 @@ function export_entities(event, print)
 		if entity.type == 'underground-belt' and entity.belt_to_ground_type == 'input' then
 			export.direction = (export.direction + 4) % 8
 		end
-		if entity.type == 'inserter' then
+       		if entity.type == 'inserter' then
 			export.inserter_rotation_speed=string.format("%.3f", entity.prototype.inserter_rotation_speed)
-			export.items=get_items_inserter (entity)
+			export.inserter_items=get_items_inserter (entity)
 		end
 
 		if export.name == 'straight-rail' then
@@ -234,6 +245,10 @@ function export_entities(event, print)
 
 		if entity.type == 'tree' then
 			export.name = 'tree'
+		end
+
+		if entity.train then
+			export.back_mover = is_carriage_back_mover(entity)
 		end
 
 		print(entity.type .. ' ' .. export.name .. ' ' .. export.direction)
