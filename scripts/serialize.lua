@@ -18,7 +18,7 @@ function serialize_object(schema, object)
         table.insert(stringified_fields, '"' .. key .. '":' .. serialize(value_schema, value))
 	end
 
-	return '{' .. table.concat(stringified_fields, ',') .. '}'
+	return '{' .. table.concat(stringified_fields, ',') .. '}\n'
 end
 
 function serialize_array(schema, array)
@@ -28,7 +28,7 @@ function serialize_array(schema, array)
 		table.insert(stringified_items, serialize(schema.items, item))
 	end
 
-	return '[' .. table.concat(stringified_items, ',') .. ']'
+	return '\n[' .. table.concat(stringified_items, ',') .. ']\n'
 end
 
 return {

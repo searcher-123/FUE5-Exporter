@@ -48,7 +48,7 @@ function process(event, debug, print)
 		local logistic_systems = get_logistic_systems(event, exported_entities, exported_entities_map, print)
 
 		if not debug then
-			game.write_file('exported-entities.json',
+			game.write_file('exported-entities'..game.tick..'.json',
 				serialize(export_schema, {
 					entities = exported_entities,
 					bounds = bounds,

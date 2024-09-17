@@ -17,7 +17,10 @@ return {
           },
           height = {
             type = "number"
-          }
+          },
+	  tick ={
+            type = "number"
+	  },
         },
         required = { "x", "y", "width", "height" }
       },
@@ -44,6 +47,10 @@ return {
               minimum = 0,
               maximum = 7
             },
+	    unit_number ={
+	      type="uint",
+              description= "A unique number identifying this entity for the lifetime of the save."
+	    },
             width = {
               type = "number",
               description = "Width of the entity"
@@ -74,7 +81,47 @@ return {
             variant = {
               type = "string",
               description = "Variant of this entity. For example \"I\", \"R\" or \"L\" for belts."
-            }
+            },
+            type = {
+              type = "string",
+              description = "Type of this entity. Craft, minign etc."
+            },
+	    mining_progress  = {
+              type = "number",
+              description = "mining progress Is a number in range [0, mining_target.prototype.mineable_properties.mining_time]" 
+            },
+	    mining_target={
+		 type = "object",
+                 properties = {
+			["x"] = { type = "number"                	},
+	                ["y"] = { type = "number"                	},
+                        ["name"]={type = "string"		},
+		required = {"x", "y","name"}
+	        },
+	    },
+	    crafting_progress  = {
+              type = "number",
+              description = "Creafting progress Is a number in range [0, 1]" 
+            },
+	    is_crafting = {
+              type = "boolean",
+              description = "Is crafting or not" 
+            },
+           items_count = {
+              type = "number",
+              description = "total items inside entity" 
+            },
+
+
+  	    drop_position= {
+                 type = "object",
+                 properties = {
+			["x"] = { type = "number"                 	},
+	                ["y"] = { type = "number"                	},
+		required = {"x", "y"}
+	        },
+	    },
+
           },
           required = { "name", "x", "y", "direction" }
         }

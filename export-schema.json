@@ -69,6 +69,10 @@
                         "type": "string",
                         "description": "Variant of this entity. For example \"I\", \"R\" or \"L\" for belts."
                     },
+		    "type":{
+                        "type": "string",
+                        "description": "Type of the entity"
+                    },
 
                 },
                 "inserter_rotation_speed": {

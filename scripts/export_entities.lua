@@ -54,6 +54,7 @@ function get_neighbour_directions(entity, neighbours)
 end
 
 function get_items_inserter(entity)
+--добавить перекладывание завод-завод, завод-лаба, лаба-лаба
 	local items = {}    
 	local pickup_list={}    
 --		game.print ("pick "..entity.pickup_target.type)
@@ -182,8 +183,25 @@ function export_entities(event, print)
 			y = entity.position.y - event.area.left_top.y,
 			direction = entity_direction_to_number(entity.direction),
 			width = width,
-			height = height
+			height = heigh,
+			unit_number=   entity.unit_number
+			
+
 		}
+		export.type=entity.type
+	        if  entity.type == 'furnace' then
+			export.is_crafting=entity.is_crafting()
+			export.crafting_progress=entity.crafting_progress
+		end
+		if entity.type=='mining-drill' then
+			export.mining_progress=entity.mining_progress
+			export.mining_target={}
+			export.mining_target.name=entity.mining_target.name
+			export.mining_target.x=entity.mining_target.position.x
+			export.mining_target.y=entity.mining_target.position.y
+--			export.drop_position.x=entity.drop_position.x	
+--			export.drop_position.y=entity.drop_position.y
+		end
 
 		if entity.type == 'pipe' then
 			local name_suffix, direction = get_pipe_type(get_neighbour_directions(entity, entity.neighbours[1]))
@@ -204,7 +222,14 @@ function export_entities(event, print)
 			local has_right = neighbour_directions[export.direction + 2]
 			local has_bottom = neighbour_directions[export.direction + 4]
 			local has_left = neighbour_directions[export.direction + 6]
+                        maxnumber= entity.get_max_inventory_index()  --entity.unit_number
+			log ("belt main"..entity.get_item_count())
+			export.items_count=entity.get_item_count()
 
+			if entity.get_main_inventory() then
+				log ('belt-'..entity.unit_number.." main = "..entity.get_main_inventory().get_item_count())
+			end
+			
 			if (has_right == has_left) or has_bottom then
 				export.variant = 'I'
 			elseif has_right then
